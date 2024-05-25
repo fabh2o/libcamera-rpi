@@ -7,8 +7,9 @@ pkgname=(
   libcamera-ipa
   libcamera-tools
   gst-plugin-libcamera
+  python-libcamera
 )
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
 arch=(x86_64)
@@ -26,6 +27,7 @@ makedepends=(
   libtiff
   libyaml
   meson
+  pybind11
   python-jinja
   python-ply
   python-sphinx
@@ -39,8 +41,8 @@ makedepends=(
 source=(
   "git+$_url#tag=v$pkgver"
 )
-sha512sums=('5cd700a500bb79b09a435b0d95c8246d93e971725177314f043fc0cdc3517e44ad21b5d14ce690a251ac9762a5691a3b85c0655211897b76704166bcdf5d2f0a')
-b2sums=('61098ac3c98ce166e3ad12c65d9b01a4c705ec6a3a1e4b942dfc2bf577616079de82b6ea266ef6c3faf239103d44e911691892908534810e42dec5bff9b360e2')
+sha512sums=('4b9502074c1d1aaa8d02ebf237623d7bd706fe7d208052c671322d49e5c6519c0324946dbe6422114424c39bbcbfd4e4546e12c4fb649df76d62a7e9bea731bf')
+b2sums=('39374df08f5d863ae1685de8204f290aedfac82bb6715b26868d2168e6d328e605675b34a6a841de2a7ef5ef49ca331b1cf2c24485971fdadb94e5b0d1a47be1')
 
 _pick() {
   local p="$1" f d; shift
@@ -116,6 +118,7 @@ package_libcamera() {
     _pick $pkgbase-ipa usr/lib/libcamera/
     _pick $pkgbase-tools usr/bin/{cam,qcam,lc-compliance}
     _pick gst-plugin-$pkgbase usr/lib/gstreamer-*
+    _pick python-$pkgbase usr/lib/python*
   )
 }
 
@@ -198,6 +201,22 @@ package_gst-plugin-libcamera() {
     gstreamer
     gst-plugins-base-libs
     libcamera libcamera.so libcamera-base.so
+  )
+
+  mv -v $pkgname/* "$pkgdir"
+}
+
+package_python-libcamera() {
+  pkgdesc+=" - Python integration"
+  license=(
+    CC0-1.0
+    LGPL-2.1-or-later
+  )
+  depends=(
+    gcc-libs
+    glibc
+    libcamera
+    python
   )
 
   mv -v $pkgname/* "$pkgdir"
