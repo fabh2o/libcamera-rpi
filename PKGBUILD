@@ -9,7 +9,6 @@ pkgname=(
   gst-plugin-libcamera
 )
 pkgver=0.2.0
-_commit=a3690f601bf9a90e1a936d9f361aebd789e3b073  # refs/tags/v0.2.0
 pkgrel=1
 pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
 arch=(x86_64)
@@ -38,10 +37,10 @@ makedepends=(
   texlive-core
 )
 source=(
-  "git+$_url#tag=$_commit"
+  "git+$_url#tag=v$pkgver"
 )
-sha512sums=('SKIP')
-b2sums=('SKIP')
+sha512sums=('5cd700a500bb79b09a435b0d95c8246d93e971725177314f043fc0cdc3517e44ad21b5d14ce690a251ac9762a5691a3b85c0655211897b76704166bcdf5d2f0a')
+b2sums=('61098ac3c98ce166e3ad12c65d9b01a4c705ec6a3a1e4b942dfc2bf577616079de82b6ea266ef6c3faf239103d44e911691892908534810e42dec5bff9b360e2')
 
 _pick() {
   local p="$1" f d; shift
