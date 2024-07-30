@@ -1,6 +1,6 @@
 pkgbase = libcamera
 	pkgdesc = A complex camera support library for Linux, Android, and ChromeOS
-	pkgver = 0.3.0
+	pkgver = 0.3.1
 	pkgrel = 1
 	url = https://libcamera.org/
 	arch = x86_64
@@ -20,14 +20,14 @@ pkgbase = libcamera
 	makedepends = python-ply
 	makedepends = python-sphinx
 	makedepends = python-pyyaml
-	makedepends = qt5-base
-	makedepends = qt5-tools
+	makedepends = qt6-base
+	makedepends = qt6-tools
 	makedepends = sdl2
 	makedepends = systemd
 	makedepends = texlive-core
-	source = git+https://git.libcamera.org/libcamera/libcamera.git#tag=v0.3.0
-	sha512sums = 4b9502074c1d1aaa8d02ebf237623d7bd706fe7d208052c671322d49e5c6519c0324946dbe6422114424c39bbcbfd4e4546e12c4fb649df76d62a7e9bea731bf
-	b2sums = 39374df08f5d863ae1685de8204f290aedfac82bb6715b26868d2168e6d328e605675b34a6a841de2a7ef5ef49ca331b1cf2c24485971fdadb94e5b0d1a47be1
+	source = git+https://git.libcamera.org/libcamera/libcamera.git#tag=v0.3.1
+	sha512sums = 00a0387e64aecf29dd20c093f3c4c80b1960136f0eadd50a5e89de160c4c83cd3abd3605e7a57f98397c32da877975c472cf4f5bd6930044ab2dc0d1bc028936
+	b2sums = 3a1a7bc7f78b5f46a561d5c558293942bc012c4dde74cd9bb19739cab34b22d53a64a6a51213c1d01e50afe1ea3acfe346477af5066303265801c1da52427fe3
 
 pkgname = libcamera
 	license = Apache-2.0
@@ -94,7 +94,7 @@ pkgname = libcamera-tools
 	depends = libtiff
 	depends = libtiff.so
 	depends = libyaml
-	depends = qt5-base
+	depends = qt6-base
 	depends = sdl2
 	conflicts = libcamera-tests<0.0.1-2
 	replaces = libcamera-tests<0.0.1-2
