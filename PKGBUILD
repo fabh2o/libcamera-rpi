@@ -1,21 +1,25 @@
-# Maintainer: David Runge <dvzrv@archlinux.org>
+# Maintainer: Fabrice Monasterio <arch@fabricemonasterio.dev>
+# From the archlinux package libcamera maintained by David Runge <dvzrv@archlinux.org>
+# and from http://git.intranifty.net/pkg/libcamera-rpi/ by Ingar <ingar@telenet.be>
 
-pkgbase=libcamera
+pkgbase=libcamera-rpi
+_pkgbase=libcamera
 pkgname=(
-  libcamera
-  libcamera-docs
-  libcamera-ipa
-  libcamera-tools
-  gst-plugin-libcamera
-  python-libcamera
+  libcamera-rpi
+  libcamera-rpi-docs
+  libcamera-rpi-ipa
+  libcamera-rpi-tools
+  gst-plugin-libcamera-rpi
+  python-libcamera-rpi
 )
-pkgver=0.3.2
+pkgver=0.3.2+rpt20240927
+_pkgver=0.3.2
 pkgrel=1
-pkgdesc="A complex camera support library for Linux, Android, and ChromeOS"
-arch=(x86_64)
-url="https://libcamera.org/"
-_url=https://git.libcamera.org/libcamera/libcamera.git
+pkgdesc="A complex camera support library for Linux, Android, and ChromeOS. RaspberryPi Fork."
+arch=(x86_64 i686 aarch64 armv7h)
+url="https://github.com/raspberrypi/libcamera.git"
 makedepends=(
+  boost
   doxygen
   git
   glib2
@@ -37,12 +41,18 @@ makedepends=(
   sdl2
   systemd
   texlive-core
+  texlive-latex
 )
+# "git+$url#tag=v$pkgver"
 source=(
-  "git+$_url#tag=v$pkgver"
+  "https://github.com/raspberrypi/libcamera/releases/download/v${pkgver}/libcamera-${pkgver}.tar.xz"
+  "libcamera-rpi-0.3.2-arch.patch"
 )
-sha512sums=('68d3f1b9353700452005be64223133ed0bddb0af15806df5c96c81b090ddd8adb8fdddf5430ed783bc6e89e7cb5910db5a0e20cb09734e995ab7199e884ba357')
-b2sums=('593acb5ed5bffe932f4bc9890c1010683dc332284393f03acddccdd9de01f082de903ec4b51a53f8f415ba70435289db04fb571bbf3b363380c8cf40276aac71')
+# makepkg -g
+sha256sums=(
+  '4d6502a2371204f3a54955f4a25f806be88fcc469167f655afbe9b398f827392'
+  '5c8f66b75a3d470101bb69c572de93e1d14e29c614dcb0391f3ea526781c260e'
+)
 
 _pick() {
   local p="$1" f d; shift
@@ -54,13 +64,11 @@ _pick() {
   done
 }
 
-pkgver() {
-  cd $pkgbase
-  git describe --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/v//g'
-}
-
 prepare() {
+  mv $_pkgbase-$_pkgver $pkgbase
   cd $pkgbase
+
+  patch -Np1 -i ../libcamera-rpi-0.3.2-arch.patch
 
   # add version, so that utils/gen-version.sh may rely on it
   printf "%s\n" "$pkgver" > .tarball-version
@@ -68,9 +76,14 @@ prepare() {
 
 build() {
   local meson_options=(
-    -D v4l2=true
+    --buildtype=release
+    --wrap-mode default            # to build libisp
+    -D pipelines=rpi/vc4,rpi/pisp  # hardware acceleration and rpi5 image signal processor
+    -D ipas=rpi/vc4,rpi/pisp       # https://libcamera.org/guides/ipa.html
+    -D pycamera=enabled            # Enable libcamera Python bindings
+    -D v4l2=true                   # Compile the V4L2 compatibility layer
     -D tracing=disabled
-    -D test=true
+    -D test=true                   # Compile and include the tests
   )
 
   arch-meson $pkgbase build "${meson_options[@]}"
@@ -81,7 +94,7 @@ check() {
   meson test -C build || echo "Tests require CLONE_NEWUSER/ CLONE_NEWNET."
 }
 
-package_libcamera() {
+package_libcamera-rpi() {
   license=(
     Apache-2.0
     CC0-1.0
@@ -95,7 +108,7 @@ package_libcamera() {
     gcc-libs
     glibc
     gnutls
-    libcamera-ipa
+    libcamera-rpi-ipa
     libelf
     libunwind
     libyaml
@@ -103,11 +116,12 @@ package_libcamera() {
     systemd-libs libudev.so
   )
   optdepends=(
-    'gst-plugin-libcamera: GStreamer plugin'
-    'libcamera-docs: for documentation'
-    'libcamera-tools: for applications'
+    'gst-plugin-libcamera-rpi: GStreamer plugin'
+    'libcamera-rpi-docs: for documentation'
+    'libcamera-rpi-tools: for applications'
   )
   provides=(libcamera.so libcamera-base.so)
+  conflicts=(libcamera)
 
   meson install -C build --destdir "$pkgdir"
   install -vDm 644 $pkgbase/LICENSES/{BSD-3-Clause,Linux-syscall-note,MIT}.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
@@ -122,7 +136,7 @@ package_libcamera() {
   )
 }
 
-package_libcamera-docs() {
+package_libcamera-rpi-docs() {
   pkgdesc+=" - documentation"
   license=(
     CC-BY-4.0
@@ -131,11 +145,11 @@ package_libcamera-docs() {
   )
 
   mv -v $pkgname/* "$pkgdir"
-  mv -v "$pkgdir/usr/share/doc/$pkgbase-$pkgver/" "$pkgdir/usr/share/doc/$pkgbase/"
+  mv -v "$pkgdir/usr/share/doc/$_pkgbase-$_pkgver/" "$pkgdir/usr/share/doc/$pkgbase/"
   rm -frv "$pkgdir/usr/share/doc/$pkgbase/html/.buildinfo"
 }
 
-package_libcamera-ipa() {
+package_libcamera-rpi-ipa() {
   pkgdesc+=" - signed IPA"
   license=(
     BSD-2-Clause
@@ -147,8 +161,9 @@ package_libcamera-ipa() {
   depends=(
     gcc-libs
     glibc
-    libcamera libcamera.so libcamera-base.so
+    libcamera-rpi libcamera.so libcamera-base.so
   )
+  conflicts=("libcamera-ipa")
   # stripping requires re-signing of IPA libs, so we do it manually
   options=(!strip)
 
@@ -160,7 +175,7 @@ package_libcamera-ipa() {
   install -vDm 644 $pkgbase/LICENSES/BSD-2-Clause.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
 }
 
-package_libcamera-tools() {
+package_libcamera-rpi-tools() {
   pkgdesc+=" - tools"
   license=(
     BSD-2-Clause
@@ -172,7 +187,7 @@ package_libcamera-tools() {
     gcc-libs
     glibc
     gtest
-    libcamera libcamera.so libcamera-base.so
+    libcamera-rpi libcamera.so libcamera-base.so
     libdrm
     libevent libevent-2.1.so libevent_pthreads-2.1.so
     libjpeg-turbo libjpeg.so
@@ -181,14 +196,13 @@ package_libcamera-tools() {
     qt6-base
     sdl2
   )
-  conflicts=("$pkgbase-tests<0.0.1-2")
-  replaces=("$pkgbase-tests<0.0.1-2")
+  conflicts=("libcamera-tools")
 
   mv -v $pkgname/* "$pkgdir"
   install -vDm 644 $pkgbase/LICENSES/BSD-2-Clause.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
 }
 
-package_gst-plugin-libcamera() {
+package_gst-plugin-libcamera-rpi() {
   pkgdesc="Multimedia graph framework - libcamera plugin"
   license=(
     CC0-1.0
@@ -200,13 +214,14 @@ package_gst-plugin-libcamera() {
     glib2 libg{lib,object}-2.0.so
     gstreamer
     gst-plugins-base-libs
-    libcamera libcamera.so libcamera-base.so
+    libcamera-rpi libcamera.so libcamera-base.so
   )
+  conflicts=("gst-plugin-libcamera")
 
   mv -v $pkgname/* "$pkgdir"
 }
 
-package_python-libcamera() {
+package_python-libcamera-rpi() {
   pkgdesc+=" - Python integration"
   license=(
     CC0-1.0
@@ -215,9 +230,10 @@ package_python-libcamera() {
   depends=(
     gcc-libs
     glibc
-    libcamera
+    libcamera-rpi
     python
   )
+  conflicts=("python-libcamera")
 
   mv -v $pkgname/* "$pkgdir"
 }
